@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prysm-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prysm
+  template:
+    metadata:
+      labels:
+        app: prysm
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      containers:
+      - name: prysm
+        image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
+        args:
+        - "--datadir=/data"
+        - "--execution-endpoint=http://geth-service:8551"
+        - "--jwt-secret=/jwt/jwt.hex"
+        - "--accept-terms-of-use"
+        # - "--goerli"
+        ports:
+        - containerPort: 13000
+        - containerPort: 12000
+        volumeMounts:
+        - name: prysm-storage
+          mountPath: /data
+        - name: jwt-secret
+          mountPath: /jwt
+          readOnly: true
+      volumes:
+      - name: prysm-storage
+        persistentVolumeClaim:
+          claimName: prysm-pvc
+      - name: jwt-secret
+        secret:
+          secretName: jwt-secret

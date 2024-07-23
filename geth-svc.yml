@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: geth-service
+spec:
+  selector:
+    app: geth
+  ports:
+  - port: 8545
+    targetPort: 8545
+    name: http
+  - port: 8551
+    targetPort: 8551
+    name: authrpc
+  type: LoadBalancer
